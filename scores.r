@@ -37,11 +37,12 @@ scores_ARF_rev_pos<- mapply(seq_rev_pos,FUN=PWMscoreStartingAt,SIMPLIFY=TRUE,  s
 pos_max <- apply(FUN=which.max,scores_ARF_pos,2)
 pos_max_rev<- apply(FUN=which.max,scores_ARF_rev_pos,2)
 #
-seq_plus <- seq_pos[pos_max==96]
-seq_rev<- seq_rev_pos[pos_max_rev==96]
+middle <- median(c(pos_max,pos_max_rev))
+seq_plus <- seq_pos[pos_max==middle]
+seq_rev<- seq_rev_pos[pos_max_rev==middle]
 #
-scores_plus <- scores_ARF_pos[,pos_max==96]
-scores_rev <- scores_ARF_rev_pos[,pos_max_rev==96]
+scores_plus <- scores_ARF_pos[,pos_max==middle]
+scores_rev <- scores_ARF_rev_pos[,pos_max_rev==middle]
 #
 seq <- c(seq_plus,seq_rev)
 scores <- cbind(scores_plus,scores_rev)
