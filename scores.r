@@ -20,26 +20,32 @@ pwm_ARF <-  reverseComplement(pwm_ARF_rev) ; pwm_ARF
 
 #-------------------------------------read fasta files-----------------------------------------
 
-
-ARF_pos <- readDNAStringSet('ARF5.fas')#[(1:1000)]
+ARF_pos <- readDNAStringSet('ARF5.fas')
 width_pos <- width(ARF_pos)
 seq_pos <- as.character(ARF_pos)
 seq_rev_pos <- as.character(reverseComplement(ARF_pos))
 
+#-------------------------------------read bed files-----------------------------------------
+
+bed <- read.csv('ARF5.bed',sep="\t", header=FALSE)
+DAP_score <- rep(bed[,5],2)
 
 
 #-------------------------------------Compute Scores-----------------------------------------
 th <- -6
 #
 scores_ARF_pos<- mapply(seq_pos,FUN=PWMscoreStartingAt,SIMPLIFY=TRUE,  starting.at=mapply(seq,1,width_pos-dim(pwm_ARF)[2],SIMPLIFY=FALSE),MoreArgs=list(pwm=pwm_ARF)) - maxScore(pwm_ARF)
+#
 scores_ARF_rev_pos<- mapply(seq_rev_pos,FUN=PWMscoreStartingAt,SIMPLIFY=TRUE,  starting.at=mapply(seq,1,width_pos-dim(pwm_ARF)[2],SIMPLIFY=FALSE),MoreArgs=list(pwm=pwm_ARF)) - maxScore(pwm_ARF)
 #
 pos_max <- apply(FUN=which.max,scores_ARF_pos,2)
 pos_max_rev<- apply(FUN=which.max,scores_ARF_rev_pos,2)
 #
 middle <- median(c(pos_max,pos_max_rev))
+#
 seq_plus <- seq_pos[pos_max==middle]
-seq_rev<- seq_rev_pos[pos_max_rev==middle]
+seq_rev <- seq_rev_pos[pos_max_rev==middle]
+DAP_score <- DAP_score[c(pos_max,pos_max_rev)==middle]
 #
 scores_plus <- scores_ARF_pos[,pos_max==middle]
 scores_rev <- scores_ARF_rev_pos[,pos_max_rev==middle]
@@ -48,9 +54,9 @@ seq <- c(seq_plus,seq_rev)
 scores <- cbind(scores_plus,scores_rev)
 #
 
-seq_ind <- apply(FUN=max,scores,2) > th & apply(FUN=max,scores,2) < th + 1
+seq_ind <- apply(FUN=max,scores,2) > th & apply(FUN=max,scores,2) < (th + 1)
 seq_sel <- seq[seq_ind]
-
+DAP_score <- DAP_score[seq_ind]
 
 ########################### Compute Dinucleotide ###############################
 
@@ -72,12 +78,18 @@ dinuc <- dinuc[!sapply(names_dinuc,FUN=str_detect,pattern="RNA"),]
 codes <- t(sapply(seq_sel,FUN=PWMscoreStartingAt,pwm=pwm,starting.at=(1:(reg_size-1))))
 dim_codes <- dim(codes)
 
-M <- numeric()
-for (i in 1:(reg_size-1))
+pearson <- numeric()
+for (j in (1:dim(dinuc)[1]))
 {
-    M <- cbind(M,dinuc["Major Groove Width",codes[,i]])
+    M <- numeric()
+    for (i in 1:(reg_size-1))
+    {
+        M <- cbind(M,dinuc[j,codes[,i]])
+    }
+    corel <- apply(FUN=cor,M,y=DAP_score,2)
+    pearson <- rbind(pearson,corel)
+    print(j)
 }
-rownames(M) <- names(codes)
 
 ## tableau <- matrix(0,125,reg_size-1)
 ## rownames(tableau) <- dinuc[,2]
