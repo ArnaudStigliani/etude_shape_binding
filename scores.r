@@ -51,7 +51,7 @@ seq_ind <- apply(FUN=max,scores,2) > th & apply(FUN=max,scores,2) < th + 1
 seq_sel <- seq[seq_ind]
 
 
-###########################C ompute Dinucleotide ###############################
+########################### Compute Dinucleotide ###############################
 
 pwm <- matrix(c(1,5,9,13,0,1,2,3),byrow=FALSE,nrow=4)
 rownames(pwm) <- c("A","C","G","T")
@@ -60,13 +60,23 @@ reg_size <- mean(width(seq_set))
 #----------------------- read table ------------------------------------
 
 dinuc <- read.table("table.txt",header=TRUE,sep="\t")
+names_dinuc <- dinuc[,2]
+dinuc <- data.matrix(dinuc[,-(1:2)])
+rownames(dinuc) <- names_dinuc
+dinuc <- dinuc[!sapply(names_dinuc,FUN=str_detect,pattern="RNA"),]
 
 #---------------------- Compute Dinucleotides -----------------------
 
 
-codes <- sapply(seq_sel,FUN=PWMscoreStartingAt,pwm=pwm,starting.at=(1:(reg_size-1)))
+codes <- t(sapply(seq_sel,FUN=PWMscoreStartingAt,pwm=pwm,starting.at=(1:(reg_size-1))))
 dim_codes <- dim(codes)
-#scores <- matrix(as.vector(unlist(scores)),nrow=dim_score[1])
+
+M <- numeric()
+for (i in 1:(reg_size-1))
+{
+    M <- cbind(M,dinuc["Major Groove Width",codes[,i]])
+}
+rownames(M) <- names(codes)
 
 ## tableau <- matrix(0,125,reg_size-1)
 ## rownames(tableau) <- dinuc[,2]
