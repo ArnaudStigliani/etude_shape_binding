@@ -100,7 +100,7 @@ library(RColorBrewer)
 my_palette <- colorRampPalette(c("blue","white","red"))(n = 400)
 
 
-heatmap.2(pearson[6:15,(50:150)],
+heatmap.2(pearson[1:51,50:150],
   ## cellnote = bound,  # same data set for cell labels
   ## main = "Correlation", # heat map title
   ## notecol="black",      # change font color of cell labels to black
