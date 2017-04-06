@@ -90,20 +90,32 @@ for (j in (1:dim(dinuc)[1]))
     pearson <- rbind(pearson,corel)
     print(j)
 }
-
-## tableau <- matrix(0,125,reg_size-1)
-## rownames(tableau) <- dinuc[,2]
-## for (i in 1:(dim_score[2]))
-## {
-##     for (j in 1:(dim_score[1]))
-##     {
-##         tableau[,j] <- tableau[,j] + dinuc[,scores[j,i]+2]
-##     }
-## }
-## tableau <- tableau/dim_score[2]
+rownames(pearson) <- rownames(dinuc)
 
 
-## names <- rownames(tableau)
-## tableau <- tableau[!sapply(names,FUN=str_detect,pattern="RNA"),]
+library(gplots)
+library(RColorBrewer)
+
+
+my_palette <- colorRampPalette(c("blue","white","red"))(n = 400)
+
+
+heatmap.2(pearson[6:15,(50:150)],
+  ## cellnote = bound,  # same data set for cell labels
+  ## main = "Correlation", # heat map title
+  ## notecol="black",      # change font color of cell labels to black
+  density.info="none",
+  trace="none",                                      # turns off density plot inside color legend
+  ## trace="none",
+  Rowv=FALSE,                      # turns off trace lines inside the heat map
+  symkey=FALSE,
+  symbreaks=FALSE,
+  margins =c(5,15),     # widens margins around plot
+  col=my_palette,       # use on color palette defined earlier
+  ## #breaks=col_breaks,    # enable color transition at specified limits
+  dendrogram="none",     # only draw a row dendrogram
+  Colv="NA",
+  keysize=1
+  )            # turn off column clustering
 
 
